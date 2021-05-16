@@ -6,6 +6,7 @@ import json
 import pyautogui
 
 from button import ImageButton, Button, globalization, TextBox, Text, Top, Money
+from autorization import Reg
 
 pygame.init()
 pygame.font.init()
@@ -59,13 +60,13 @@ class Menu:
         self.buttons_ready = [Button(but[0], but[1], but[3], but[4], width_text=but[5]) for but in self.buttons]
 
         self.prof = ImageButton(profile_photo, (20, 20), size=(200, 200))
-        self.name_profile = Text('Player', (20, 230), 40)
+        #self.name_profile = Text('Player', (20, 230), 40)
         self.enter_name = False
 
 
 
 
-
+        self.reg = Reg(height, width)
 
 
 
@@ -82,9 +83,11 @@ class Menu:
                    'Тяночка9': 157,
                    'Тяночка10': 145,
                    }
-        I = [self.name_profile.text.title(), 15, 49]
-        top = Top((SIZE[0]-340, 20), (320, 700), players, I)
+        top = Top((SIZE[0]-340, 20), (320, 550), players)
         moneys = Money((SIZE[0]/2-200, 0), 189)
+        reg_button = Button((20, 240, 200, 80), (255, 153, 51), 'Регестрация', 24, width_text=25)
+
+
 
         while True:
             position_mouse = pygame.mouse.get_pos()
@@ -101,7 +104,7 @@ class Menu:
             for button in self.buttons_ready:
                 if button.name_button('Играть') and button.press(position_mouse, press_mouse):
                     self.enter_name = False
-                    game.start(self.name_profile.text)
+                    game.start('Muhammed')
 
 
 
@@ -119,19 +122,25 @@ class Menu:
 
             #---------profile---------
             window.blit(*self.prof())
-            self.name_profile.render()
-            if self.name_profile.press(position_mouse, press_mouse) or self.enter_name:
-                self.enter_name = True
-            if self.enter_name:
-                if self.name_profile.input():
-                    self.enter_name = False
-                    I[0] = self.name_profile.text
+            #self.name_profile.render()
+            #if self.name_profile.press(position_mouse, press_mouse) or self.enter_name:
+            #    self.enter_name = True
+            #if self.enter_name:
+            #    if self.name_profile.input():
+            #        self.enter_name = False
+            #        I[0] = self.name_profile.text
+            reg_button.render()
+            if reg_button.press(position_mouse, press_mouse):
+                self.reg.start(window)
+
+
+
             #-------------------------
 
             window.blit(player_images['stop'], (SIZE[0]/2-32, SIZE[1]/2-32))
 
             #----------TOP------------
-            top.render(players, I)
+            top.render(players)
             top.press(position_mouse, press_mouse)
             #-------------------------
 
@@ -154,6 +163,7 @@ class Player:
     font = pygame.font.Font(None, 24)
     def __init__(self, name: str, first_cord: tuple, HP=100):
         self.x, self.y = first_cord
+        name.title()
         self.name = name
         self.image = 'stop'
         self.timer = 0

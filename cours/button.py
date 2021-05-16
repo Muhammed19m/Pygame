@@ -124,42 +124,58 @@ class TextBox:
 
 
 class Text:
-    def __init__(self, text: str, cord: tuple, font, color=(0, 0, 0)):
+    def __init__(self, size: tuple, text: str, cord: tuple, font, color=(0, 0, 0), color_box=(255,255,255)):
         self.cord = cord
         self.timee = 0
         self.font = font
         self.text = text
+        self.color_box = color_box
         self.color = color
+        self.size = size
+        self.input_text = False
+        self.surf = pygame.Surface((self.size))
+        self.surf.fill(color_box)
+        self.surf.blit(pygame.font.Font(None, self.font).render(self.text, 1, self.color), (5, 8))
     def render(self):
-        window.blit(pygame.font.Font(None, self.font).render(self.text.title(), 1, self.color), self.cord)
+
+
+        window.blit(self.surf, (self.cord))
+        #window.blit(pygame.font.Font(None, self.font).render(self.text.title(), 1, self.color), self.cord)
 
     def input(self):
         keys_alpha = {113: 'q', 119: 'w', 101: 'e', 114: 'r', 116: 't', 121: 'y', 117: 'u', 105: 'i', 111: 'o',
                       112: 'p', 97: 'a', 115: 's', 100: 'd', 102: 'f', 103: 'g', 104: 'h', 106: 'j', 107: 'k', 108: 'l',
-                      122: 'z', 120: 'x', 99: 'c', 118: 'v', 98: 'b', 110: 'n', 109: 'm'}
+                      122: 'z', 120: 'x', 99: 'c', 118: 'v', 98: 'b', 110: 'n', 109: 'm', 46: '.', 49:'1', 50:'2',
+                      51:'3', 52:'4', 53:'5', 54:'6', 55:'7', 56:'8', 57:'9', 48:'0'}
         key = pygame.key.get_pressed()
         for i in range(len(key)):
             if time.time() - self.timee > 0.2 and key[i]:
                 self.timee = time.time()
+                if key[pygame.K_LSHIFT]:
+                    if pygame.key.get_pressed()[50]:
+                        self.text+='@'
+                        return
                 if i == 8:
                     self.text = self.text[:-1]
                 elif i == 13:
-                    return True
+                    self.input_text = False
                 else:
-                    if keys_alpha.get(i) and len(self.text) <= 12:
+                    if keys_alpha.get(i) and len(self.text) <= 40:
                         self.text += keys_alpha.get(i)
+        self.surf.fill(self.color_box)
+        self.surf.blit(pygame.font.Font(None, self.font).render(self.text, 1, self.color), (5, 8))
+
 
     def press(self, position_mouse, press_mouse):
-        if position_mouse[0] > self.cord[0] and position_mouse[0] < self.cord[0] + 200:
-            if position_mouse[1] > self.cord[1] and position_mouse[1] < self.cord[1] + self.font:
+        if position_mouse[0] > self.cord[0] and position_mouse[0] < self.cord[0] + self.size[0]:
+            if position_mouse[1] > self.cord[1] and position_mouse[1] < self.cord[1] + self.size[1]:
                 if press_mouse[0]:
                     return True
         return False
 
 class Top:
-    def __init__(self, cord: tuple, size: tuple, players: dict, I=('Player', 15), color=(255, 51, 0), type=''):
+    def __init__(self, cord: tuple, size: tuple, players: dict, color=(255, 51, 0), type=''):
         self.cord = cord
-        self.I = I
         self.type = type
         self.size = size
         self.players = players
@@ -183,22 +199,21 @@ class Top:
         for player, point in players.items():
             moment = f'{count}.{player}'.ljust(20, '.')
             self.surf.blit(pygame.font.Font(None, 32).render(moment+str(point), 1, (0, 51, 0)), (25, self.number))
-            self.number += 40
+            self.number += 30
             count += 1
-        moment = f'{I[2]}.{I[0]}'.ljust(20, '.')
 
-        self.surf.blit(pygame.font.Font(None, 32).render(moment+str(I[1]), 1, (0,0,0)), (25, self.number+50))
-    def render(self, players, I):
+
+    def render(self, players):
         window.blit(self.surf, self.cord)
-        self.__init__(self.cord, self.size, self.players, I, type=self.type)
+        self.__init__(self.cord, self.size, self.players, type=self.type)
 
     def press(self, position_mouse, press_mouse):
         if position_mouse[0] > 10+self.cord[0] and position_mouse[0] < 108+self.cord[0] and position_mouse[1] > self.size[1]-70+self.cord[1] and position_mouse[1] < self.size[1]-10+self.cord[1] and press_mouse[0]:
-            self.__init__(self.cord, self.size, self.players, self.I,type='  day')
+            self.__init__(self.cord, self.size, self.players, type='  day')
         if position_mouse[0] > 110+self.cord[0] and position_mouse[0] < 210+self.cord[0] and position_mouse[1] > self.size[1]-70+self.cord[1] and position_mouse[1] < self.size[1]+self.cord[1] and press_mouse[0]:
-            self.__init__(self.cord, self.size, self.players, self.I,type=' week')
+            self.__init__(self.cord, self.size, self.players, type=' week')
         if position_mouse[0] > 210+self.cord[0] and position_mouse[0] < self.size[0]-20+self.cord[0] and position_mouse[1] > self.size[1]-70+self.cord[1] and position_mouse[1] < self.size[1]+self.cord[1] and press_mouse[0]:
-            self.__init__(self.cord, self.size, self.players, self.I,type='month')
+            self.__init__(self.cord, self.size, self.players, type='month')
 
 
 class Money:
