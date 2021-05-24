@@ -72,8 +72,8 @@ class Menu:
 
     def start(self):
 
-        players = {'Тяночка1': 1341,
-                   'Тяночка2': 1298,
+        players = {'Обдулотыф': 1341,
+                   'Обдулозыс': 1298,
                    'Тяночка3': 901,
                    'Тяночка4': 856,
                    'Тяночка5': 799,
@@ -85,7 +85,7 @@ class Menu:
                    }
         top = Top((SIZE[0]-340, 20), (320, 550), players)
         moneys = Money((SIZE[0]/2-200, 0), 189)
-        reg_button = Button((20, 240, 200, 80), (255, 153, 51), 'Регестрация', 24, width_text=25)
+        reg_button = Button((20, 240, 200, 80), (255, 153, 51), 'Регистрация', 24, width_text=25)
 
 
 
@@ -104,7 +104,7 @@ class Menu:
             for button in self.buttons_ready:
                 if button.name_button('Играть') and button.press(position_mouse, press_mouse):
                     self.enter_name = False
-                    game.start('Muhammed')
+                    game.start('Обдулозыс')
 
 
 
@@ -200,11 +200,11 @@ class Player:
 
     def auto_move(self, keys):
         if keys[pygame.K_UP] and self.y > 0:
-            self.y -= 0.5
+            self.y -= 1
         if keys[pygame.K_DOWN] and self.y < SIZE[1] - 64:
-            self.y += 0.5
+            self.y += 1
         if keys[pygame.K_LEFT] and self.x > 0:
-            self.x -= 0.5
+            self.x -= 1
             if self.timer < 15:
                 self.image = 'goL1'
             else:
@@ -212,7 +212,7 @@ class Player:
                 if self.timer == 30: self.timer = 0
             self.timer += 1
         if keys[pygame.K_RIGHT] and self.x < SIZE[0] - 32:
-            self.x += 0.5
+            self.x += 1
             if self.timer < 15:
                 self.image = 'goR1'
             else:
@@ -232,7 +232,7 @@ scroll = [0, 0]
 
 class Game:
     def __init__(self):
-        self.player = Player('Player1', (100, 100))
+        self.player = Player('Обдулозыс', (100, 100))
         #self.player.image = 'stop'
        # self.text = Player('     Нияр', (100, 499))
         self.FPS = pygame.time.Clock()
@@ -241,7 +241,7 @@ class Game:
 
     def start(self, name):#, players={'Muhammed': {self.player.x}}):
         self.player.name = name
-        player2 = Player('Player2', (100, 100))
+        player2 = Player('Обдулотыф', (100, 100))
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

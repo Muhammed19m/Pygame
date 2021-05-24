@@ -1,4 +1,5 @@
 import pygame
+import random
 pygame.init()
 
 from button import Button, Text, TextBox
@@ -18,9 +19,10 @@ class Reg:
         self.dec3 = Text((120, 40), 'password:', (self.w/2-320, self.h/2-30), 32, color_box=(0,0,0), color=(255,255,255))
         self.dec4 = Text((210, 40), ' confirmation code:', (self.w/2-420, self.h/2+30), 32, color_box=(0,0,0), color=(255,255,255))
 
+        self.code_m = str(random.randrange(10, 100))+str(random.randrange(100, 1000))
 
     def start(self, window):
-        exit_b = Button((self.w/2-100, self.h/2+200, 200, 100), (255, 153, 51), 'Готово', 48, 65)
+        exit_b = Button((self.w/2-100, self.h/2+200, 200, 100), (255, 153, 51), 'Готово', 48, width_text=15)
         send = Button((self.w/2-200+500+20, self.h/2-150,  100, 40), (255, 153, 51), 'send code', 18, width_text=5)
 
         email = 'muhammed.clams_2002@mail.ru'
