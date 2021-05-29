@@ -8,6 +8,7 @@ def globalization(win):
     global window
     window = win
 
+SIZE = None
 
 additional_pngn = os.listdir('images\\additional')
 additional_png = {name[:-4]: pygame.image.load('images\\additional\\'+name) for name in additional_pngn}
@@ -227,6 +228,41 @@ class Money:
         self.surf.blit(pygame.font.Font(None, 48).render(str(self.moneys), 1, (255, 0,0 )), (200, 33))
         window.blit(self.surf, self.cord)
 
+
+
+
+
+
+
+
+
+
+class Market:
+    def __init__(self):
+        pass
+    def start(self):
+        exit = Button((SIZE[0]//2-100, SIZE[1]//2+200, 200, 100), (255, 153, 51), 'Exit', 48, width_text=45)
+
+        while True:
+            keys = pygame.key.get_pressed()
+            poss = pygame.mouse.get_pos()
+            press = pygame.mouse.get_pressed()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            window.fill((51, 51, 153))
+            if keys[pygame.K_ESCAPE]: break
+
+            exit.render()
+            if exit.press(poss, press): break
+
+
+
+
+
+            pygame.display.update()
 
 
 

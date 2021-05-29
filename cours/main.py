@@ -4,8 +4,8 @@ import os
 import random
 import json
 import pyautogui
-
-from button import ImageButton, Button, globalization, TextBox, Text, Top, Money
+import button
+from button import ImageButton, Button, globalization, TextBox, Text, Top, Money, Market
 from autorization import Reg
 
 pygame.init()
@@ -19,14 +19,14 @@ window = pygame.display.set_mode(SIZE, pygame.FULLSCREEN)
 pygame.display.set_caption("Cyber cringe 2D city")
 
 display = pygame.Surface(SIZE)
-
+button.SIZE = SIZE
 globalization(window)
 
 
 # ______________________________________
 
-player_images = {"stop": pygame.image.load("images\player\stop.png"), "goL1": pygame.image.load("images\player\goL1.png"), "goL2": pygame.image.load("images\player\goL2.png"), "goR1": pygame.image.load("images\player\goR1.png"), "goR2": pygame.image.load("images\player\goR2.png")}
-
+player_images = {"stop": pygame.image.load("images\player\stop.png"), "goL1": pygame.image.load("images\player\goL1.png"), "goL2": pygame.image.load("images\player\goL2.png"), "goR1": pygame.image.load("images\player\goR1.png"), "goR2": pygame.image.load("images\player\goR2.png"), "wR": pygame.image.load('images\player\wR.png'), "wL": pygame.image.load('images\player\wL.png')}
+weapons = {'m1L': pygame.image.load('images\weapon\m1L.png'), 'm1R': pygame.image.load('images\weapon\m1R.png')}
 
 profile_photo = os.listdir("images\profile")
 if profile_photo:
@@ -64,7 +64,7 @@ class Menu:
         self.enter_name = False
 
 
-
+        self.market = Market()
 
         self.reg = Reg(height, width)
 
@@ -104,7 +104,7 @@ class Menu:
             for button in self.buttons_ready:
                 if button.name_button('Играть') and button.press(position_mouse, press_mouse):
                     self.enter_name = False
-                    game.start('Обдулозыс')
+                    game.start('Вадик')
 
 
 
@@ -145,6 +145,9 @@ class Menu:
             #-------------------------
 
 
+            if self.buttons_ready[3].press(position_mouse, press_mouse):
+                self.market.start()
+
             if self.prof.press(position_mouse, press_mouse):
                 pass
             [button.render() for button in self.buttons_ready]
@@ -170,7 +173,7 @@ class Player:
     def render(self):
         window.blit(player_images[self.image], [self.x, self.y])
 
-    def move(self, keys):
+    def move(self, keys, press_mouse, pos):
         if keys[pygame.K_w] and self.y > 0: self.y -= 1
         if keys[pygame.K_s] and self.y < 1000: self.y += 1
         if keys[pygame.K_a] and self.x > 0:
@@ -189,14 +192,24 @@ class Player:
                 if self.timer == 30: self.timer = 0
             self.timer += 1
         else: self.image = 'stop'
+        if press_mouse[2]:
+            if pos[0] > self.x:
+                self.image = 'wR'
+                window.blit(weapons['m1R'], (self.x+50, self.y+25))
+            else:
+                self.image = 'wL'
+                window.blit(weapons['m1L'], (self.x+9, self.y+25))
+
+
 
     def cursor(self, position_mouse):
-        if position_mouse[0] > self.x and position_mouse[0] < self.x + 64:
-            if position_mouse[1] > self.y and position_mouse[1] < self.y + 64:
+        if position_mouse[0] > self.x and position_mouse[0] < self.x + 100:
+            if position_mouse[1] > self.y and position_mouse[1] < self.y + 100:
                 self.render_name()
 
     def render_name(self):
-        window.blit(Player.font.render(self.name, 1, (0, 153, 51)), (self.x-8, self.y-25))
+        window.blit(Player.font.render(self.name, 1, (0, 153, 51)), (self.x+15, self.y-25))
+
 
     def auto_move(self, keys):
         if keys[pygame.K_UP] and self.y > 0:
@@ -232,7 +245,7 @@ scroll = [0, 0]
 
 class Game:
     def __init__(self):
-        self.player = Player('Обдулозыс', (100, 100))
+        self.player = Player('Вадик', (100, 100))
         #self.player.image = 'stop'
        # self.text = Player('     Нияр', (100, 499))
         self.FPS = pygame.time.Clock()
@@ -241,7 +254,7 @@ class Game:
 
     def start(self, name):#, players={'Muhammed': {self.player.x}}):
         self.player.name = name
-        player2 = Player('Обдулотыф', (100, 100))
+        player2 = Player(' Кирилл', (400, 100))
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -250,16 +263,18 @@ class Game:
             window.fill((255, 255, 255))
             keys = pygame.key.get_pressed()
             mouse_pos = pygame.mouse.get_pos()
-
+            press_mouse = pygame.mouse.get_pressed()
             #scroll[0] += int(self.player.x)
             #scroll[1] += int(self.player.y)
 
-            self.player.move(keys)
+
             self.player.cursor(mouse_pos)
             self.player.render()
+            self.player.move(keys, press_mouse, mouse_pos)
+
             player2.render()
             player2.cursor(mouse_pos)
-            player2.auto_move(keys)
+            player2.move(keys, press_mouse, mouse_pos)
         #    self.text.auto_move(keys)
          #   self.text.render()
           #  self.text.cursor(mouse_pos)
