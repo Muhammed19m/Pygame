@@ -14,24 +14,39 @@ additional_pngn = os.listdir('images\\additional')
 additional_png = {name[:-4]: pygame.image.load('images\\additional\\'+name) for name in additional_pngn}
 del additional_pngn
 
-
+additional_pngn = os.listdir('images\\shop')
+shop_png = {name[:-4]: pygame.image.load('images\\shop\\'+name) for name in additional_pngn}
+del additional_pngn
 
 
 
 class ImageButton:
-    def __init__(self, image, cord: tuple, size=(100, 100)):
+    def __init__(self, image, cord: tuple, price=None, text=None, size=(100, 100), color=(255,255,255)):
         self.image = image
+        self.size = size
         self.cord_x, self.cord_y = cord
-        self.height = image.get_height()
-        self.width = image.get_width()
-        self.h_w = size
-        self.surf = pygame.Surface(self.h_w)
-        self.surf.blit(self.image, (0, 0))
+        self.height = self.size[1]
+        self.width = self.size[0]
+        self.surf = pygame.Surface(size)
+        self.surf.fill(color)
+        if size[0]>100: self.surf.blit(self.image, (0,0))
+        else: self.surf.blit(self.image, cord_wath((self.image.get_width(), self.image.get_height())))
+        names_font = pygame.font.Font(None, 28)
+        if text != None:
+            self.text = text
+            text = text.rjust(len(text)+(15-len(text))//2, ' ')
+            self.surf.blit(names_font.render(text, 1, (0, 0, 0)), (0, 80))
+        if price != None:
+            self.price = price
+            price = 'price: '+price
+            self.surf.blit(names_font.render(price, 1, (0, 0, 0)), (0, 5))
+
+
     def render(self):
         window.blit(self.surf, (self.cord_x, self.cord_y))
 
     def press(self, position_mouse, press_mouse):
-        if position_mouse[0] > self.cord_x and position_mouse[0] < self.cord_x + self.width:
+        if position_mouse[0] > self.cord_x and position_mouse[0] < self.cord_x + self.size[1]:
             if position_mouse[1] > self.cord_y and position_mouse[1] < self.cord_y + self.height:
                 if press_mouse[0]:
                     return True
@@ -225,6 +240,8 @@ class Money:
         self.surf.fill((0, 51, 0))
         self.surf.blit(additional_png['coin'], (50, 5))
     def render(self):
+        self.surf.fill((0, 51, 0))
+        self.surf.blit(additional_png['coin'], (50, 5))
         self.surf.blit(pygame.font.Font(None, 48).render(str(self.moneys), 1, (255, 0,0 )), (200, 33))
         window.blit(self.surf, self.cord)
 
@@ -233,17 +250,37 @@ class Money:
 
 
 
-
+def cord_wath(size_image, size_yach=(100, 100)):
+    return (size_yach[0]//2-size_image[0]//2, size_yach[1]//2-size_image[1]//2)
 
 
 
 class Market:
-    def __init__(self):
-        pass
+    def __init__(self, moneys):
+        self.moneys = moneys
+        self.bought = {}
+
     def start(self):
         exit = Button((SIZE[0]//2-100, SIZE[1]//2+200, 200, 100), (255, 153, 51), 'Exit', 48, width_text=45)
+        tim = time.time()
+        title_font = pygame.font.Font(None, 100)
+        title = title_font.render('Shop', 1, (0,255,0))
+
+        prices = {'armor': 100, 'boot': 50, 'glock': 100, 'helmet': 100, 'short': 75, 'm1': 200}
+
+        cells = []
+        x, y = 50, 200
+        for i in shop_png.items():
+            cells.append(ImageButton(i[1], (x, y), text=i[0], price=str(prices[i[0]])))
+            x += 125
+            if x > SIZE[0]-150:
+                x, y = 50, y+130
+
+
+        money = Money((SIZE[0]//2-200, SIZE[1]//2+100), self.moneys)
 
         while True:
+            window.fill((51, 51, 153))
             keys = pygame.key.get_pressed()
             poss = pygame.mouse.get_pos()
             press = pygame.mouse.get_pressed()
@@ -251,16 +288,24 @@ class Market:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+            window.blit(title, (SIZE[0]//2-100, 50))
+            money.render()
 
-            window.fill((51, 51, 153))
-            if keys[pygame.K_ESCAPE]: break
 
+
+
+            if keys[pygame.K_ESCAPE]: return self.bought, self.moneys
             exit.render()
-            if exit.press(poss, press): break
+            if exit.press(poss, press) and time.time()-tim > 0.3: return self.bought, self.moneys
 
 
+            for i in cells:
+                i.render()
 
-
+                if i.press(poss, press) and self.moneys>=int(i.price) and i.text not in self.bought:
+                    self.bought[i.text] = i.image
+                    self.moneys -= int(i.price)
+                    money.moneys = self.moneys
 
             pygame.display.update()
 

@@ -1,12 +1,13 @@
 import pygame
 import time
 import os
-import random
 import json
 import pyautogui
 import button
 from button import ImageButton, Button, globalization, TextBox, Text, Top, Money, Market
 from autorization import Reg
+from inventory import Inventory
+from player import Player
 
 pygame.init()
 pygame.font.init()
@@ -62,12 +63,13 @@ class Menu:
         self.prof = ImageButton(profile_photo, (20, 20), size=(200, 200))
         #self.name_profile = Text('Player', (20, 230), 40)
         self.enter_name = False
+        self.moneys = 2050
 
-
-        self.market = Market()
+        self.market = Market(self.moneys)
 
         self.reg = Reg(height, width)
 
+        self.inventory = {}
 
 
     def start(self):
@@ -84,10 +86,13 @@ class Menu:
                    'Тяночка10': 145,
                    }
         top = Top((SIZE[0]-340, 20), (320, 550), players)
-        moneys = Money((SIZE[0]/2-200, 0), 189)
         reg_button = Button((20, 240, 200, 80), (255, 153, 51), 'Регистрация', 24, width_text=25)
 
+        inventory_m = Inventory(SIZE, player_images, self.inventory)
+        tim = time.time()
 
+
+        self.put_on = {}
 
         while True:
             position_mouse = pygame.mouse.get_pos()
@@ -98,13 +103,13 @@ class Menu:
                     exit()
             window.fill((119, 51, 255))
 
-            moneys.render()
+            Money((SIZE[0]/2-200, 0), self.moneys).render()
 
 
             for button in self.buttons_ready:
                 if button.name_button('Играть') and button.press(position_mouse, press_mouse):
                     self.enter_name = False
-                    game.start('Вадик')
+                    game.start('Вадик', self.put_on)
 
 
 
@@ -132,6 +137,8 @@ class Menu:
             reg_button.render()
             if reg_button.press(position_mouse, press_mouse):
                 self.reg.start(window)
+                tim = time.time()
+
 
 
 
@@ -145,8 +152,15 @@ class Menu:
             #-------------------------
 
 
-            if self.buttons_ready[3].press(position_mouse, press_mouse):
-                self.market.start()
+            if self.buttons_ready[3].press(position_mouse, press_mouse) and time.time()-tim > 0.3:
+                self.inventory, self.moneys = self.market.start()
+                tim = time.time()
+
+            if self.buttons_ready[4].press(position_mouse, press_mouse) and time.time()-tim > 0.3:
+                self.put_on = inventory_m.start(window, self.inventory)
+                tim = time.time()
+
+
 
             if self.prof.press(position_mouse, press_mouse):
                 pass
@@ -158,82 +172,6 @@ class Menu:
 
 
 
-
-
-
-
-class Player:
-    font = pygame.font.Font(None, 24)
-    def __init__(self, name: str, first_cord: tuple, HP=100):
-        self.x, self.y = first_cord
-        name.title()
-        self.name = name
-        self.image = 'stop'
-        self.timer = 0
-    def render(self):
-        window.blit(player_images[self.image], [self.x, self.y])
-
-    def move(self, keys, press_mouse, pos):
-        if keys[pygame.K_w] and self.y > 0: self.y -= 1
-        if keys[pygame.K_s] and self.y < 1000: self.y += 1
-        if keys[pygame.K_a] and self.x > 0:
-            self.x -= 1
-            if self.timer < 15:
-                self.image = 'goL1'
-            else:
-                self.image = 'goL2'
-                if self.timer == 30: self.timer = 0
-            self.timer += 1
-        if keys[pygame.K_d] and self.x < 2000:
-            self.x += 1
-            if self.timer < 15: self.image = 'goR1'
-            else:
-                self.image = 'goR2'
-                if self.timer == 30: self.timer = 0
-            self.timer += 1
-        else: self.image = 'stop'
-        if press_mouse[2]:
-            if pos[0] > self.x:
-                self.image = 'wR'
-                window.blit(weapons['m1R'], (self.x+50, self.y+25))
-            else:
-                self.image = 'wL'
-                window.blit(weapons['m1L'], (self.x+9, self.y+25))
-
-
-
-    def cursor(self, position_mouse):
-        if position_mouse[0] > self.x and position_mouse[0] < self.x + 100:
-            if position_mouse[1] > self.y and position_mouse[1] < self.y + 100:
-                self.render_name()
-
-    def render_name(self):
-        window.blit(Player.font.render(self.name, 1, (0, 153, 51)), (self.x+15, self.y-25))
-
-
-    def auto_move(self, keys):
-        if keys[pygame.K_UP] and self.y > 0:
-            self.y -= 1
-        if keys[pygame.K_DOWN] and self.y < SIZE[1] - 64:
-            self.y += 1
-        if keys[pygame.K_LEFT] and self.x > 0:
-            self.x -= 1
-            if self.timer < 15:
-                self.image = 'goL1'
-            else:
-                self.image = 'goL2'
-                if self.timer == 30: self.timer = 0
-            self.timer += 1
-        if keys[pygame.K_RIGHT] and self.x < SIZE[0] - 32:
-            self.x += 1
-            if self.timer < 15:
-                self.image = 'goR1'
-            else:
-                self.image = 'goR2'
-                if self.timer == 30: self.timer = 0
-            self.timer += 1
-        else:
-            self.image = 'stop'
 
 
 
@@ -252,7 +190,7 @@ class Game:
 
 
 
-    def start(self, name):#, players={'Muhammed': {self.player.x}}):
+    def start(self, name, put_on):#, players={'Muhammed': {self.player.x}}):
         self.player.name = name
         player2 = Player(' Кирилл', (400, 100))
         while True:
@@ -268,13 +206,13 @@ class Game:
             #scroll[1] += int(self.player.y)
 
 
-            self.player.cursor(mouse_pos)
-            self.player.render()
-            self.player.move(keys, press_mouse, mouse_pos)
+            self.player.cursor(mouse_pos, window)
+            self.player.render(window, player_images, put_on)
+            self.player.move(keys, press_mouse, mouse_pos, window, weapons)
 
-            player2.render()
-            player2.cursor(mouse_pos)
-            player2.move(keys, press_mouse, mouse_pos)
+            player2.render(window, player_images, put_on)
+            player2.cursor(mouse_pos, window)
+            player2.move(keys, press_mouse, mouse_pos, window, weapons)
         #    self.text.auto_move(keys)
          #   self.text.render()
           #  self.text.cursor(mouse_pos)
