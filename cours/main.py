@@ -74,16 +74,16 @@ class Menu:
 
     def start(self):
 
-        players = {'Обдулотыф': 1341,
-                   'Обдулозыс': 1298,
-                   'Тяночка3': 901,
-                   'Тяночка4': 856,
-                   'Тяночка5': 799,
-                   'Тяночка6': 690,
-                   'КираМаренка': 563,
-                   'Тяночка8': 375,
-                   'Тяночка9': 157,
-                   'Тяночка10': 145,
+        players = {'тест1': 1341,
+                   'тест2': 1298,
+                   'тест3': 901,
+                   'тест4': 856,
+                   'тест5': 799,
+                   'тест6': 690,
+                   'тест7': 563,
+                   'тест8': 375,
+                   'тест9': 157,
+                   'тест10': 145,
                    }
         top = Top((SIZE[0]-340, 20), (320, 550), players)
         reg_button = Button((20, 240, 200, 80), (255, 153, 51), 'Регистрация', 24, width_text=25)
@@ -199,6 +199,9 @@ class Game:
                     pygame.quit()
                     exit()
             window.fill((255, 255, 255))
+
+            #camera.update(self.player)
+            #map1.render()
             keys = pygame.key.get_pressed()
             mouse_pos = pygame.mouse.get_pos()
             press_mouse = pygame.mouse.get_pressed()
@@ -212,12 +215,11 @@ class Game:
 
             player2.render(window, player_images, put_on)
             player2.cursor(mouse_pos, window)
-            player2.move(keys, press_mouse, mouse_pos, window, weapons)
+            player2.auto_move(keys, press_mouse)#, mouse_pos, window, weapons)
         #    self.text.auto_move(keys)
          #   self.text.render()
           #  self.text.cursor(mouse_pos)
 
-            #map1.render()
 
             if keys[pygame.K_ESCAPE]:
                 menu.start()
@@ -237,16 +239,48 @@ class Players:
         self.players = {players_name[self.count_players]: Player(players_name[self.count_players], )}
 
 
+class Camera:
+    def __init__(self, camera_func, width, height):
+        self.camera_func = camera_func
+        self.state = pygame.Rect(0,0,width,height)
+
+    def apply(self, target):
+        return target.rect.move(self.state.topleft)
+
+    def update(self, target): pass
+        #self.state = self.camera_func(self.state, target.rect)
+
+
+def camera_func(camera, target_rect):
+    l = -target_rect.x + SIZE[0]/2
+    t = -target_rect.y + SIZE[1]/2
+
+    w, h = camera.width, camera.height
+
+    l = min(0, l)
+    l = max(-(camera.width-SIZE[0]), l)
+    t = max(-(camera.height-SIZE[1]), t)
+    t = min(0, t)
+
+    return pygame.Rect(l,t,w,h)
+
+
+
+
+
 class Map:
     def __init__(self, map):
         self.map = map
         self.glass = pygame.image.load('images\\additional\grass.png')
 
     def render(self):
+        camera = Camera(camera_func, 1000, 1000)
+
         for line in range(len(self.map)):
             for block in range(len(self.map[line])):
                 if self.map[line][block] == 1:
-                    window.blit(self.glass, (block*30, line*30))
+                    window.blit(self.glass, camera.update(block))
+
 
 
 

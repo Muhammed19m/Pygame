@@ -22,6 +22,9 @@ del additional_pngn
 
 class ImageButton:
     def __init__(self, image, cord: tuple, price=None, text=None, size=(100, 100), color=(255,255,255)):
+        self.price = None
+        self.text = None
+
         self.image = image
         self.size = size
         self.cord_x, self.cord_y = cord
@@ -45,10 +48,10 @@ class ImageButton:
     def render(self):
         window.blit(self.surf, (self.cord_x, self.cord_y))
 
-    def press(self, position_mouse, press_mouse):
+    def press(self, position_mouse, press_mouse, th=0):
         if position_mouse[0] > self.cord_x and position_mouse[0] < self.cord_x + self.size[1]:
             if position_mouse[1] > self.cord_y and position_mouse[1] < self.cord_y + self.height:
-                if press_mouse[0]:
+                if press_mouse[th]:
                     return True
         return False
 
@@ -259,6 +262,8 @@ class Market:
     def __init__(self, moneys):
         self.moneys = moneys
         self.bought = {}
+        self.colors = {}
+
 
     def start(self):
         exit = Button((SIZE[0]//2-100, SIZE[1]//2+200, 200, 100), (255, 153, 51), 'Exit', 48, width_text=45)
@@ -271,7 +276,7 @@ class Market:
         cells = []
         x, y = 50, 200
         for i in shop_png.items():
-            cells.append(ImageButton(i[1], (x, y), text=i[0], price=str(prices[i[0]])))
+            cells.append(ImageButton(i[1], (x, y), text=i[0], price=str(prices[i[0]]), color=self.colors.get(i[0], (255,255,255))))
             x += 125
             if x > SIZE[0]-150:
                 x, y = 50, y+130
@@ -306,25 +311,7 @@ class Market:
                     self.bought[i.text] = i.image
                     self.moneys -= int(i.price)
                     money.moneys = self.moneys
+                    i.__init__(i.image, (i.cord_x, i.cord_y), i.price, i.text, i.size, (51, 204, 51))
+                    self.colors[i.text] = (51, 204, 51)
 
             pygame.display.update()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -86,11 +86,11 @@ class Player:
 
 
     def auto_move(self, keys, SIZE):
-        if keys[pygame.K_UP] and self.y > 0:
+        if keys[pygame.K_UP]:
             self.y -= 1
-        if keys[pygame.K_DOWN] and self.y < SIZE[1] - 64:
+        if keys[pygame.K_DOWN]:
             self.y += 1
-        if keys[pygame.K_LEFT] and self.x > 0:
+        if keys[pygame.K_LEFT]:
             self.x -= 1
             if self.timer < 15:
                 self.image = 'goL1'
@@ -98,7 +98,7 @@ class Player:
                 self.image = 'goL2'
                 if self.timer == 30: self.timer = 0
             self.timer += 1
-        if keys[pygame.K_RIGHT] and self.x < SIZE[0] - 32:
+        if keys[pygame.K_RIGHT]:
             self.x += 1
             if self.timer < 15:
                 self.image = 'goR1'
